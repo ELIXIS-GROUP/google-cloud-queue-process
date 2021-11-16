@@ -32,7 +32,7 @@ use GcpQueueProcessTest\TestConfig;
  * @method testCreateSubscriptionWithNotValidFormat
  * @method tearDownAfterClass
  *
- * @version 1.2.1
+ * @version 1.2.2
  * @since 1.1.0
  **/
 class PubSubServiceTest extends TestCase
@@ -279,6 +279,30 @@ class PubSubServiceTest extends TestCase
         ], $response->getInfo());
 
         return;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @since 1.2.2
+     * @version 1.2.2
+     * @return void
+     */
+    public function testPullAndDeleteMessage(): void
+    {
+        $responses = self::$pubSubService->pullMessage('test-pull-subscription');
+        $this->assertIsArray($responses);
+        
+        foreach( $responses as $response ){
+
+            $this->assertEquals('Pubsub pull message.', $response->data());
+            self::$pubSubService->deleteMessage('test-pull-subscription', $response);
+
+        }
+        
+        $responses = self::$pubSubService->pullMessage('test-pull-subscription');
+        $this->assertIsArray($responses);
+        $this->assertCount(0, $responses);
     }
 
     /**
