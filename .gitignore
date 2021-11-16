@@ -1,0 +1,6 @@
+/config/google/*
+/.env
+/vendor/
+/index.php
+/.idea/
+/phpunit.xml
