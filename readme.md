@@ -1,4 +1,4 @@
-# Google queue process for php (v1.2.1)
+# Google queue process for php (v1.2.3)
 
 gcp-queue-process is an app to interact with the lib [google-cloud-php-pubsub](https://github.com/googleapis/google-cloud-php-pubsub), and now the lib implement the service [google-cloud-php-tasks](https://github.com/googleapis/google-cloud-php-tasks) to use GCP cloudTasks.
 
@@ -10,27 +10,11 @@ gcp-queue-process also provides a method to post a message to CloudTasks. If you
 
 ## Installation
 
-To begin, install the preferred dependency manager for PHP, [Composer](https://getcomposer.org/). 
+To begin, install the preferred dependency manager for PHP, [Composer](https://getcomposer.org/).    
 
-First add this component in your file composer.json:
+Install this component with composer
 ```
-{
-    ...,
-    "repositories": [
-        {
-            "type": "vcs",
-            "url" : "git@github.com:elixis-group/gcp-queue-process.git"
-        }
-    ],
-    "require": {
-        "elixis-group/gcp-queue-process": "dev-master"
-    },
-    ...
-}
-```
-Now install this component
-```
-$ composer install
+$ composer require elixis-group/google-cloud-queue-process
 ```
 
 ## Sample to publish message
