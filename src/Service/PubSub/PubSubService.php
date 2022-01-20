@@ -44,7 +44,7 @@ class PubSubService
      **/
     private $_subscriptionFullName = null;
 
-    public function __construct(string $projectId, string $keyFilePath)
+    public function __construct(string $projectId, string $keyFilePath = null)
     {
         Kernel::loadDotEnv();
 
