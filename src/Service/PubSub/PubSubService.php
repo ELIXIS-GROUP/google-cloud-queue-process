@@ -57,15 +57,20 @@ class PubSubService
      *
      * @return Google\Cloud\PubSub\PubSubClient
      *
-     * @version 1.0.0
+     * @version 1.2.5
      * @since 1.0.0
      **/
     public function pubSubClient(): PubSubClient
     {
-        return new PubSubClient([
+        $pubSubConfig = [
             'projectId' => $this->_projectId,
-            'keyFilePath' => $this->_keyFilePath,
-        ]);
+        ];
+
+        if (isset($this->_keyFilePath)) {
+            $pubSubConfig['keyFilePath'] = $this->_keyFilePath;
+        }
+
+        return new PubSubClient($pubSubConfig);
     }
 
     /**

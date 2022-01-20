@@ -1,4 +1,4 @@
-# Google queue process for php (v1.2.4)
+# Google queue process for php (v1.2.5)
 
 gcp-queue-process is an app to interact with the lib [google-cloud-php-pubsub](https://github.com/googleapis/google-cloud-php-pubsub), and now the lib implement the service [google-cloud-php-tasks](https://github.com/googleapis/google-cloud-php-tasks) to use GCP cloudTasks.
 
