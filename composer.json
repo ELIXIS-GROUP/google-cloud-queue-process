@@ -2,8 +2,8 @@
     "name": "elixis-group/google-cloud-queue-process",
     "description": "Package php to extends google/cloud-pubsub, this component is used to publish a new message in pub / sub and other tools than the basic component, this one allow to go further with Pub / Sub tool.",
     "readme" : "/readme.md",
-    "version" : "1.2.5",
-    "time" : "2021-01-20",
+    "version" : "1.3.0",
+    "time" : "2021-02-23",
     "type": "library",
     "require": {
         "google/cloud-pubsub": "^1.32",
