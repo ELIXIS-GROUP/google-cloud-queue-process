@@ -23,7 +23,7 @@ use Google\Cloud\PubSub\Message;
  * @method setTopic Set topic.
  * @method getTopic Get topic.
  *
- * @version 1.2.0
+ * @version 1.3.0
  * @since 1.0.0
  **/
 class MessageHandlerBase
@@ -55,7 +55,7 @@ class MessageHandlerBase
      *
      * @return void
      *
-     * @version 1.1.0
+     * @version 1.3.0
      * @since 1.0.0
      **/
     public function __invoke(string $type, $pubsubMessage)
@@ -68,19 +68,14 @@ class MessageHandlerBase
                 return $this->processedData($decodeMessage);
             }
         } elseif ('pull' === $type) {
+
             $decodeMessage = json_decode($pubsubMessage->data(), true);
-            $this->_pubSubService->deleteMessage($this->getSubscription(), $pubsubMessage);
+            if ($decodeMessage) {
+                ini_set('memory_limit', '-1');
 
-            try {
-                if ($decodeMessage) {
-                    ini_set('memory_limit', '-1');
-
-                    return $this->processedData($decodeMessage);
-                }
-            } catch (\Exception $e) {
-                $this->_pubSubService->publishMessage($this->getTopic(), $pubsubMessage->data());
-                throw new \Exception('Error in processedData method, this message is publish again with type "pull"');
+                return $this->processedData($decodeMessage);
             }
+
         } else {
             throw new \Exception('Invalid type : "failedType", use "pull" or "push".');
         }

@@ -51,24 +51,36 @@ class MessageConsumerHandler
     /**
      * Send pull message to worker.
      *
-     * @param string             $subscriptionName the Pub/Sub subscription name
-     * @param MessageHandlerBase $messageHandler   pubSub class to consume and trait message
-     * @version 1.2.0
+     * @param string             $subscriptionName
+     * @param string             $topicName
+     * @param MessageHandlerBase $messageHandler
+     * @param PubSubService      $pubSubService
+     * @param Array              $pullOptions
+     * 
+     * @version 1.3.0
      * @since 1.1.0
      **/
-    public function pullConsumer(string $subscriptionName, MessageHandlerBase $messageHandler, PubSubService $pubSubService): Response
+    public function pullConsumer(string $subscriptionName, string $topicName, MessageHandlerBase $messageHandler, PubSubService $pubSubService, Array $pullOptions = []): Response
     {
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
         $response->setStatusCode(Response::HTTP_OK);
 
         $messageHandler->setSubscription($subscriptionName);
-        $messages = $pubSubService->pullMessage($subscriptionName);
+        $messageHandler->setTopic($topicName);
+
+        $messages = $pubSubService->pullMessage($subscriptionName, $pullOptions);
 
         try {
             foreach ($messages as $k => $message) {
-                $messageHandler('pull', $message);
+                try{
+                    $messageHandler('pull', $message);
+                } catch (\Exception $e) {
+                    $pubSubService->publishMessage($messageHandler->getTopic(), $message->data());
+                    //throw new \Exception('Error in processedData method, this message is publish again with type "pull"');
+                }
             }
+
             $result = 'Pull message for subscription \''.$subscriptionName.'\' was executed successfully.';
 
             $response->setContent(json_encode([
