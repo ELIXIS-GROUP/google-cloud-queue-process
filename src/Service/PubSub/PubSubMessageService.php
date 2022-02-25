@@ -20,7 +20,7 @@ use Google\Cloud\PubSub\Message;
  * @method pullMessage   pull a Pub/Sub message.
  * @method deleteMessage delete a Pub/Sub message.
  *
- * @version 1.2.0
+ * @version 1.3.0
  * @since 1.0.0
  **/
 trait PubSubMessageService
@@ -42,21 +42,23 @@ trait PubSubMessageService
 
     /**
      * Pull Pub/Sub message.
-     * WARNING Don't forget use method deleteMessage after pull message for purge subscription queue.
-     *
+     * 
      * @param string $subscriptionName the Pub/Sub subscription name
-     *
-     * @version 1.0.0
+     * @param array $pullOptions
+     * 
+     * @version 1.3.0
      * @since 1.0.0
      **/
-    public function pullMessage(string $subscriptionName): array
+    public function pullMessage(string $subscriptionName, array $pullOptions = []): array
     {
         $messages = [];
         $subscription = $this->pubSubClient()->subscription($subscriptionName);
-        $pubSubMessages = $subscription->pull();
 
-        foreach ($pubSubMessages as $key => $pubSubMessage) {
-            array_push($messages, $pubSubMessage);
+        $pubsubMessages = $subscription->pull($pullOptions);
+
+        foreach ($pubsubMessages as $key => $pubsubMessage) {
+            array_push($messages, $pubsubMessage);
+            $this->deleteMessage($subscriptionName, $pubsubMessage);
         }
 
         return $messages;

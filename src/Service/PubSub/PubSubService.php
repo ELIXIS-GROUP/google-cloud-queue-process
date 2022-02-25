@@ -44,6 +44,21 @@ class PubSubService
      **/
     private $_subscriptionFullName = null;
 
+    /**
+     * @var boolean
+    **/
+    private $_verifyMessageTopicExist = true;
+
+    /**
+     * @var boolean
+    **/
+    private $_verifyMessageSubscriptionExist = true;
+
+    /**
+     * @var boolean
+    **/
+    private $_autorizeCreationTopicAndSubscription = true;
+
     public function __construct(string $projectId, string $keyFilePath = null)
     {
         Kernel::loadDotEnv();
@@ -129,7 +144,7 @@ class PubSubService
      * @param string $subscriptionName the Pub/Sub subscription name
      * @param string $message          the Pub/Sub message
      *
-     * @version 1.1.0
+     * @version 1.3.0
      * @since 1.0.0
      **/
     public function publishPullMessage(string $topicName, string $subscriptionName, string $message): PubSubService
@@ -138,21 +153,30 @@ class PubSubService
             throw new \Exception(json_encode($this->_error(Response::HTTP_CONFLICT, 'The Resource name (topic or subscription) has not a valid format see https://cloud.google.com/pubsub/docs/admin#resource_names for more information.', 'HTTP_CONFLICT')), 1);
         }
 
-        $topic = $this->pubSubClient()->topic($topicName);
-        if (!$topic->exists()) {
-            $topic = $this->createTopic($topicName);
-            if ($this->getTopicFullName() == $topic) {
-                $subscription = $this->pubSubClient()->subscription($subscriptionName);
-                if (!$subscription->exists()) {
-                    $topic = $this->createSubscription($topicName, $subscriptionName);
+        if( $this->getVerifyMessageTopicExist() ){
+            $topic = $this->pubSubClient()->topic($topicName);
+            if (!$topic->exists() && $this->getAutorizeCreationTopicAndSubscription() ) {
+                $topic = $this->createTopic($topicName);
+                if ($this->getTopicFullName() == $topic) {
+
+                    if( $this->getVerifyMessageSubscriptionExist() ){
+                        $subscription = $this->pubSubClient()->subscription($subscriptionName);
+                        if (!$subscription->exists() && $this->getAutorizeCreationTopicAndSubscription()) {
+                            $this->createSubscription($topicName, $subscriptionName);
+                        }
+                    }
+
+                } else {
+                    throw new \Exception(json_encode($this->_error(Response::HTTP_CONFLICT, 'Topic : "'.$topicName.'" not exist, there was an error during topic creation.', 'HTTP_CONFLICT')), 1);
                 }
-            } else {
-                throw new \Exception(json_encode($this->_error(Response::HTTP_CONFLICT, 'Topic : "'.$topicName.'" not exist, there was an error during topic creation.', 'HTTP_CONFLICT')), 1);
-            }
-        } else {
+            } 
+
+        }
+          
+        if( $this->getVerifyMessageSubscriptionExist() ){
             $subscription = $this->pubSubClient()->subscription($subscriptionName);
-            if (!$subscription->exists()) {
-                $topic = $this->createSubscription($topicName, $subscriptionName);
+            if (!$subscription->exists() && $this->getAutorizeCreationTopicAndSubscription() ) {
+                $this->createSubscription($topicName, $subscriptionName);
             }
         }
 
@@ -168,24 +192,28 @@ class PubSubService
     /**
      * Publish push message to Pub/Sub.
      *
-     * @param string $topicName        the Pub/Sub topic name
-     * @param string $subscriptionName the Pub/Sub subscription name
-     * @param string $message          the Pub/Sub message
+     * @param string $topicName              the Pub/Sub topic name
+     * @param string $subscriptionName       the Pub/Sub subscription name
+     * @param string $message                the Pub/Sub message
      *
-     * @version 1.1.0
+     * @version 1.3.0
      * @since 1.0.0
      **/
     public function publishPushMessage(string $topicName, string $subscriptionName, string $message): PubSubService
     {
-        $topic = $this->pubSubClient()->topic($topicName);
-        if (!$topic->exists()) {
-            $topic = $this->createTopic($topicName);
-            if ($this->getTopicFullName() == $topic) {
-                $this->publishPushMessage($topicName, $subscriptionName, $message);
-            } else {
-                throw new \Exception(json_encode($this->_error(Response::HTTP_CONFLICT, 'Topic : "'.$topicName.'" not exist, there was an error during topic creation.', 'HTTP_CONFLICT')));
+        if( $this->getVerifyMessageTopicExist() ){
+            $topic = $this->pubSubClient()->topic($topicName);
+            if (!$topic->exists() && $this->getAutorizeCreationTopicAndSubscription() ) {
+                $topic = $this->createTopic($topicName);
+                if ($this->getTopicFullName() == $topic) {
+                    $this->publishPushMessage($topicName, $subscriptionName, $message);
+                } else {
+                    throw new \Exception(json_encode($this->_error(Response::HTTP_CONFLICT, 'Topic : "'.$topicName.'" not exist, there was an error during topic creation.', 'HTTP_CONFLICT')));
+                }
             }
-        } else {
+        }
+
+        if( $this->getVerifyMessageSubscriptionExist() ){
             $subscription = $this->pubSubClient()->subscription($subscriptionName);
             if (!$subscription->exists()) {
                 throw new \Exception(json_encode($this->_error(Response::HTTP_CONFLICT, 'Subscription : "'.$subscriptionName.'" not exist, add a new subscription in the GCP Console by specify the push method.', 'HTTP_CONFLICT')));
@@ -336,4 +364,77 @@ class PubSubService
     {
         return $this->_projectId;
     }
+
+    /**
+     * Get verifyMessageTopicExist.
+     *
+     * @version 1.2.6
+     * @since 1.2.6
+     **/
+    public function getVerifyMessageTopicExist(): string
+    {
+        return $this->_verifyMessageTopicExist;
+    }
+
+    /**
+     * Set verifyMessageTopicExist.
+     *
+     * @version 1.2.6
+     * @since 1.2.6
+     **/
+    public function setVerifyMessageTopicExist(string $verifyMessageTopicExist): PubSubService
+    {
+        $this->_verifyMessageTopicExist = $verifyMessageTopicExist;
+
+        return $this;
+    }
+
+    /**
+     * Get verifyMessageSubscriptionExist.
+     *
+     * @version 1.2.6
+     * @since 1.2.6
+     **/
+    public function getVerifyMessageSubscriptionExist(): string
+    {
+        return $this->_verifyMessageSubscriptionExist;
+    }
+
+    /**
+     * Set verifyMessageSubscriptionExist.
+     *
+     * @version 1.2.6
+     * @since 1.2.6
+     **/
+    public function setVerifyMessageSubscriptionExist(string $verifyMessageSubscriptionExist): PubSubService
+    {
+        $this->_verifyMessageSubscriptionExist = $verifyMessageSubscriptionExist;
+
+        return $this;
+    }
+
+    /**
+     * Get AutorizeCreationTopicAndSubscription.
+     *
+     * @version 1.2.6
+     * @since 1.2.6
+     **/
+    public function getAutorizeCreationTopicAndSubscription(): string
+    {
+        return $this->_autorizeCreationTopicAndSubscription;
+    }
+
+    /**
+     * Set AutorizeCreationTopicAndSubscription.
+     *
+     * @version 1.2.6
+     * @since 1.2.6
+     **/
+    public function SetAutorizeCreationTopicAndSubscription(string $autorizeCreationTopicAndSubscription): PubSubService
+    {
+        $this->_autorizeCreationTopicAndSubscription = $autorizeCreationTopicAndSubscription;
+
+        return $this;
+    }
+
 }
