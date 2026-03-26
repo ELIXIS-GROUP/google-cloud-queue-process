@@ -2,14 +2,15 @@
     "name": "elixis-group/google-cloud-queue-process",
     "description": "Package php to extends google/cloud-pubsub, this component is used to publish a new message in pub / sub and other tools than the basic component, this one allow to go further with Pub / Sub tool.",
     "readme" : "/readme.md",
-    "version" : "1.5.0",
-    "time" : "2025-12-15",
+    "version" : "2.0.0",
+    "time" : "2026-03-26",
     "type": "library",
     "require": {
-        "google/cloud-pubsub": "^1.32",
-        "symfony/dotenv": "^4.4|^5.4|^6.4|^7.0",
-        "google/cloud-tasks": "^1.9",
-        "symfony/http-foundation": "^4.4|^5.4|^6.4|^7.0"
+        "php": ">=8.2",
+        "google/cloud-pubsub": "^2.19",
+        "symfony/dotenv": "^7.0|^8.0",
+        "google/cloud-tasks": "^2.2",
+        "symfony/http-foundation": "^7.0|^8.0"
     },
     "authors": [
         {
@@ -28,8 +29,8 @@
         }
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3.0",
-        "phpstan/phpstan": "^0.12.94",
-        "phpunit/phpunit": "^8"
+        "friendsofphp/php-cs-fixer": "^3.94",
+        "phpstan/phpstan": "^2.1",
+        "phpunit/phpunit": "^11.5"
     }
 }
