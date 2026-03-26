@@ -5,10 +5,15 @@
  * (c) Anthony Papillaud <apapillaud@elixis.com>
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
+ * 
+ * @see doc https://docs.cloud.google.com/php/docs/reference/cloud-tasks/latest
  */
 
 namespace GoogleCloudQueueProcess\Service\CloudTasks;
 
+use Google\Cloud\Tasks\V2\CreateQueueRequest;
+use Google\Cloud\Tasks\V2\DeleteQueueRequest;
+use Google\Cloud\Tasks\V2\ListQueuesRequest;
 use Google\Cloud\Tasks\V2\Queue;
 
 trait CloudTasksQueueService
@@ -19,11 +24,14 @@ trait CloudTasksQueueService
         $locationName = $cloudTasksClient::locationName($this->_projectId, $this->_locationId);
         $ressourceQueueName = $cloudTasksClient::queueName($this->_projectId, $this->_locationId, $queueName);
 
-        $queue = new Queue([
-            'name' => $ressourceQueueName,
-        ]);
+        $queue = (new Queue())
+            ->setName($ressourceQueueName);
 
-        $result = $cloudTasksClient->createQueue($locationName, $queue);
+        $queueRequest = (new CreateQueueRequest())
+            ->setParent($locationName)
+            ->setQueue($queue);
+
+        $result = $cloudTasksClient->createQueue($queueRequest);
 
         return $result->getName();
     }
@@ -34,7 +42,11 @@ trait CloudTasksQueueService
 
         $cloudTasksClient = $this->cloudTasksClient();
         $locationName = $cloudTasksClient::locationName($this->_projectId, $this->_locationId);
-        $listQueues = $cloudTasksClient->listQueues($locationName);
+        
+        $queueRequest = (new ListQueuesRequest())
+            ->setParent($locationName);
+
+        $listQueues = $cloudTasksClient->listQueues($queueRequest);
 
         foreach ($listQueues->iterateAllElements() as $k => $queue) {
             array_push($queues, $queue->getName());
@@ -57,7 +69,10 @@ trait CloudTasksQueueService
         $cloudTasksClient = $this->cloudTasksClient();
         $ressourceQueueName = $cloudTasksClient::queueName($this->_projectId, $this->_locationId, $queueName);
 
-        $result = $cloudTasksClient->deleteQueue($ressourceQueueName);
+        $queueRequest = (new DeleteQueueRequest())
+            ->setName($ressourceQueueName);
+
+        $result = $cloudTasksClient->deleteQueue($queueRequest);
 
         return;
     }

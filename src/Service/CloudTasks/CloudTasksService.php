@@ -10,7 +10,8 @@
 namespace GoogleCloudQueueProcess\Service\CloudTasks;
 
 use Google\Cloud\Tasks\V2\AppEngineHttpRequest;
-use Google\Cloud\Tasks\V2\CloudTasksClient;
+use Google\Cloud\Tasks\V2\Client\CloudTasksClient;
+use Google\Cloud\Tasks\V2\CreateTaskRequest;
 use Google\Cloud\Tasks\V2\HttpMethod;
 use Google\Cloud\Tasks\V2\Task;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,7 +25,7 @@ use Symfony\Component\HttpFoundation\Response;
  * @method createTask Create a new task.
  * @method _createHttpRequest Defines the HTTP request that is sent to an App Engine app when the task is dispatched.
  *
- * @version 1.1.0
+ * @version 2.0.0
  * @since 1.1.0
  **/
 class CloudTasksService
@@ -66,7 +67,7 @@ class CloudTasksService
     /**
      * Init Cloud Tasks client.
      *
-     * @return Google\Cloud\Tasks\V2\CloudTasksClient
+     * @return CloudTasksClient
      *
      * @version 1.1.0
      * @since 1.1.0
@@ -81,7 +82,7 @@ class CloudTasksService
     /**
      * Create a new task.
      *
-     * @version 1.1.0
+     * @version 2.0.0
      * @since 1.1.0
      **/
     public function createTask(string $message, string $queueName, string $urlTaskHandler): CloudTasksService
@@ -99,7 +100,11 @@ class CloudTasksService
                 $ressourceQueueName = $cloudTasksClient::queueName($this->_projectId, $this->_locationId, $queueName);
             }
 
-            $result = $cloudTasksClient->createTask($ressourceQueueName, $task);
+            $requestTask = (new CreateTaskRequest())
+                ->setParent($ressourceQueueName)
+                ->setTask($task);
+                
+            $result = $cloudTasksClient->createTask($requestTask);
 
             $this->_setInfo($ressourceQueueName, $result->getName());
         } catch (\Exception $e) {
