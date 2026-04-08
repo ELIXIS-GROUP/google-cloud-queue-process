@@ -9,6 +9,7 @@
 
 namespace GoogleCloudQueueProcess\Service\PubSub;
 
+use Google\Auth\Credentials\ServiceAccountCredentials;
 use GoogleCloudQueueProcess\Kernel;
 use Google\Cloud\PubSub\PubSubClient;
 use Symfony\Component\HttpFoundation\Response;
@@ -59,7 +60,7 @@ class PubSubService
     **/
     private $_autorizeCreationTopicAndSubscription = true;
 
-    public function __construct(string $projectId, string $keyFilePath = null)
+    public function __construct(string $projectId, ?string $keyFilePath = null)
     {
         Kernel::loadDotEnv();
 
@@ -72,7 +73,7 @@ class PubSubService
      *
      * @return Google\Cloud\PubSub\PubSubClient
      *
-     * @version 1.2.5
+     * @version 2.0.1
      * @since 1.0.0
      **/
     public function pubSubClient(): PubSubClient
@@ -82,7 +83,9 @@ class PubSubService
         ];
 
         if (isset($this->_keyFilePath)) {
-            $pubSubConfig['keyFilePath'] = $this->_keyFilePath;
+            $scopes = ['https://www.googleapis.com/auth/cloud-platform'];
+            $creds = new ServiceAccountCredentials($scopes, $this->_keyFilePath);
+            $pubSubConfig['credentials'] = $creds;
         }
 
         return new PubSubClient($pubSubConfig);
